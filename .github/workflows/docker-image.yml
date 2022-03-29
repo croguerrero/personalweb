@@ -17,5 +17,5 @@ jobs:
     - name: Build the Docker image
       run: |
            echo "${{ secrets.DOCKERPW }}" | docker login -u "croguerrero" --password-stdin
-           docker build . --file build/Dockerfile --tag croguerrero/webpage:$(date +%s)
-           docker push croguerrero/webpage:$(date +%s)
+           docker build . --file build/Dockerfile --tag croguerrero/webpage:v1
+           docker push croguerrero/webpage:v1
