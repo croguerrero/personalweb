@@ -1,21 +1,15 @@
-name: Docker Image CI
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
 jobs:
-
-  build:
-
+  enviar_correo:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: |
-           echo "${{ secrets.DOCKERPW }}" | docker login -u "croguerrero" --password-stdin
-           docker build . --file build/Dockerfile --tag croguerrero/webpage:v1
-           docker push croguerrero/webpage:v1
+      - name: Checkout del código
+        uses: actions/checkout@v4 # Necesario para acceder a git si usas comandos git
+
+      - name: Obtener Mensaje del Commit
+        run: |
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          echo "::set-output name=mensaje::$COMMIT_MESSAGE"
+        id: get_message # Asigna un ID a este paso para referenciar su output
+
+      - name: Mostrar mensaje del commit (opcional)
+        run: echo "El mensaje del commit es: ${{ steps.get_message.outputs.mensaje }}"
