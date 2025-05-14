@@ -9,8 +9,5 @@ jobs: # Esta línea debe estar sin indentación
       - name: Obtener Mensaje del Commit
         run: |
           COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
-          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV # Usar GITHUB_ENV
-        # Ya no necesitas 'id' para pasar variables de esta manera
-
-      - name: Mostrar mensaje del commit (opcional)
-        run: echo "El mensaje del commit es: ${{ env.COMMIT_MESSAGE }}" # Leer de env
+          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV # Usar GITHUB_ENV        
+          echo "El mensaje del commit es: ${{ env.COMMIT_MESSAGE }}" # Leer de env
