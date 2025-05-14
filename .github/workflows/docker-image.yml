@@ -1,15 +1,16 @@
-jobs:
-  enviar_correo:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout del código
-        uses: actions/checkout@v4 # Necesario para acceder a git si usas comandos git
+# ... cualquier otra configuración del workflow (como 'name', 'on') ...
+jobs: # Esta línea debe estar sin indentación
+  enviar_correo: # Indentado 2 espacios bajo jobs:
+    runs-on: ubuntu-latest # Indentado al mismo nivel que el nombre del job
+    steps: # Indentado al mismo nivel que runs-on:
+      - name: Checkout del código # Indentado con un guion y un espacio bajo steps:
+        uses: actions/checkout@v4 # Indentado bajo - name: (2 espacios adicionales)
 
-      - name: Obtener Mensaje del Commit
-        run: |
-          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
-          echo "::set-output name=mensaje::$COMMIT_MESSAGE"
-        id: get_message # Asigna un ID a este paso para referenciar su output
+      - name: Obtener Mensaje del Commit # Indentado con un guion y un espacio bajo steps:
+        run: | # Indentado bajo - name:
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}" # Indentado bajo run: |
+          echo "::set-output name=mensaje::$COMMIT_MESSAGE" # Indentado bajo run: |
+        id: get_message # Indentado al mismo nivel que run: y uses: (si aplica)
 
-      - name: Mostrar mensaje del commit (opcional)
-        run: echo "El mensaje del commit es: ${{ steps.get_message.outputs.mensaje }}"
+      - name: Mostrar mensaje del commit (opcional) # Indentado con un guion y un espacio bajo steps:
+        run: echo "El mensaje del commit es: ${{ steps.get_message.outputs.mensaje }}" # Indentado bajo - name:
