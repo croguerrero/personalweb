@@ -6,11 +6,11 @@ jobs: # Esta línea debe estar sin indentación
       - name: Checkout del código # Indentado con un guion y un espacio bajo steps:
         uses: actions/checkout@v4 # Indentado bajo - name: (2 espacios adicionales)
 
-      - name: Obtener Mensaje del Commit # Indentado con un guion y un espacio bajo steps:
-        run: | # Indentado bajo - name:
-          COMMIT_MESSAGE="${{ github.event.head_commit.message }}" # Indentado bajo run: |
-          echo "::set-output name=mensaje::$COMMIT_MESSAGE" # Indentado bajo run: |
-        id: get_message # Indentado al mismo nivel que run: y uses: (si aplica)
+      - name: Obtener Mensaje del Commit
+        run: |
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV # Usar GITHUB_ENV
+        # Ya no necesitas 'id' para pasar variables de esta manera
 
-      - name: Mostrar mensaje del commit (opcional) # Indentado con un guion y un espacio bajo steps:
-        run: echo "El mensaje del commit es: ${{ steps.get_message.outputs.mensaje }}" # Indentado bajo - name:
+      - name: Mostrar mensaje del commit (opcional)
+        run: echo "El mensaje del commit es: ${{ env.COMMIT_MESSAGE }}" # Leer de env
