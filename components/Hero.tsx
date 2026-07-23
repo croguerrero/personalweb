@@ -1,7 +1,7 @@
 import React from 'react';
 import { Terminal } from './Terminal';
 import { motion } from 'framer-motion';
-import { Cloud, Server, ShieldCheck, Activity, Network } from 'lucide-react';
+import { Cloud, Server, ShieldCheck, Activity, Network, FileDown } from 'lucide-react';
 
 export const Hero: React.FC = () => {
     const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -112,6 +112,14 @@ export const Hero: React.FC = () => {
                             className="px-8 py-3.5 border border-slate-700 hover:border-sky-400 text-slate-300 hover:text-sky-400 font-medium rounded transition-all bg-slate-900/50 backdrop-blur-sm cursor-pointer"
                         >
                             View Logs
+                        </a>
+                        <a
+                            href="/CV-Christian-Guerrero.pdf"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-8 py-3.5 border border-slate-700 hover:border-emerald-400 text-slate-300 hover:text-emerald-400 font-medium rounded transition-all bg-slate-900/50 backdrop-blur-sm cursor-pointer"
+                        >
+                            <FileDown size={18} /> Download CV
                         </a>
                     </motion.div>
                 </div>

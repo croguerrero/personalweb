@@ -175,8 +175,8 @@ export const EXPERIENCE: Job[] = [
   },
   {
     id: "fid-2022",
-    company: "DevOps Engineer – Contractor",
-    role: "DevOps Engineer",
+    company: "ZENTA Group",
+    role: "DevOps Engineer - Contractor",
     period: "Sep 2022 – May 2023",
     account: "FID_Seguros - Chile",
     description: [

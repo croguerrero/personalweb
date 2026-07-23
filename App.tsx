@@ -7,6 +7,8 @@ import { Certifications } from './components/Certifications';
 import { Footer } from './components/Footer';
 import { PipelineProgress } from './components/PipelineProgress';
 import { Portfolio } from './components/Portfolio';
+import { Languages } from './components/Languages';
+import { Contact } from './components/Contact';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +21,8 @@ const App: React.FC = () => {
         <Skills />
         <Certifications />
         <Portfolio />
+        <Languages />
+        <Contact />
       </main>
       <Footer />
     </div>

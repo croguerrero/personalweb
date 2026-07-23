@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Linkedin, Mail, Coffee } from 'lucide-react';
+import { Github, Linkedin, Mail, Coffee, FileDown } from 'lucide-react';
 
 export const Footer: React.FC = () => {
     return (
@@ -13,8 +13,15 @@ export const Footer: React.FC = () => {
                         </p>
                     </div>
 
-                    <div className="flex gap-6">
-                        {/* Replaced generic links with non-navigating elements to prevent 'Blocked' frame errors in preview */}
+                    <div className="flex items-center gap-6">
+                        <a
+                            href="/CV-Christian-Guerrero.pdf"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm text-slate-300 hover:text-emerald-400 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/40 transition-all cursor-pointer"
+                        >
+                            <FileDown size={16} /> CV
+                        </a>
                         <a href="https://www.linkedin.com/in/marcelo-guerrero-760413125" target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800">
                             <Linkedin size={20} />
                         </a>
