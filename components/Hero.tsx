@@ -82,14 +82,14 @@ export const Hero: React.FC = () => {
                         <div className="flex items-center gap-3 text-slate-300 text-lg md:text-xl font-light">
                             <ShieldCheck size={20} className="text-devops-accent" />
                             <span className="h-5 w-[1px] bg-slate-700"></span>
-                            <span>DevSecOps Engineer</span>
+                            <span>Platform &amp; DevSecOps Engineer</span>
                             <span className="h-5 w-[1px] bg-slate-700"></span>
-                            <span>Cloud Engineer</span>
+                            <span>AI/LLM Security</span>
                         </div>
 
                         <p className="text-slate-400 leading-relaxed max-w-lg mt-6 text-base md:text-lg">
-                            Orchestrating scalable infrastructure on <span className="text-slate-200 font-medium">GCP & AWS</span>.
-                            Specialized in Kubernetes, CI/CD automation, and IaC with a security-first mindset.
+                            Building scalable, secure platforms on <span className="text-slate-200 font-medium">GKE, Istio &amp; Terraform</span>.
+                            Now focused on securing <span className="text-slate-200 font-medium">AI agents and LLM pipelines</span> — MCP servers, agentic-AI red-teaming, and private LLM infrastructure.
                         </p>
                     </motion.div>
 

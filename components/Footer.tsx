@@ -9,7 +9,7 @@ export const Footer: React.FC = () => {
                     <div className="text-center md:text-left">
                         <h3 className="text-xl font-bold text-white mb-2">&lt;CG /&gt;</h3>
                         <p className="text-slate-500 text-sm">
-                            DevSecOps & Cloud Engineer
+                            Platform & DevSecOps Engineer · Securing AI & LLM Pipelines
                         </p>
                     </div>
 
