@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture — portfolio.slopeit.com</title>
+  <meta name="description" content="Infrastructure architecture diagram for portfolio.slopeit.com: Cloudflare → CloudFront → S3, manual deploy pipeline." />
+  <style>
+  :root {
+    --bg: #f5f8fc;
+    --panel: #ffffff;
+    --panel-2: #eef3f9;
+    --border: #d6dfec;
+    --text: #0f1b2d;
+    --muted: #566884;
+    --accent: #0284c7;
+    --accent-soft: rgba(2,132,199,.10);
+    --cf: #f6821f;
+    --cfront: #8c4fff;
+    --s3: #4a9c2d;
+    --gh: #3a4250;
+    --dev: #0ea5e9;
+    --ok: #10b981;
+    --shadow: 0 1px 2px rgba(16,32,55,.06), 0 8px 24px rgba(16,32,55,.06);
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #080d18; --panel: #111a2b; --panel-2: #0d1524; --border: #223049;
+      --text: #e8eef6; --muted: #8b9bb4; --accent: #38bdf8; --accent-soft: rgba(56,189,248,.12);
+      --cf: #ff9838; --cfront: #a97bff; --s3: #6dc24a; --gh: #aeb7c4; --dev: #38bdf8;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f8fc; --panel: #ffffff; --panel-2: #eef3f9; --border: #d6dfec;
+    --text: #0f1b2d; --muted: #566884; --accent: #0284c7; --accent-soft: rgba(2,132,199,.10);
+    --cf: #f6821f; --cfront: #8c4fff; --s3: #4a9c2d; --gh: #3a4250; --dev: #0ea5e9;
+    --shadow: 0 1px 2px rgba(16,32,55,.06), 0 8px 24px rgba(16,32,55,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg: #080d18; --panel: #111a2b; --panel-2: #0d1524; --border: #223049;
+    --text: #e8eef6; --muted: #8b9bb4; --accent: #38bdf8; --accent-soft: rgba(56,189,248,.12);
+    --cf: #ff9838; --cfront: #a97bff; --s3: #6dc24a; --gh: #aeb7c4; --dev: #38bdf8;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    margin: 0;
+    padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px) 72px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .inner { max-width: 1040px; margin: 0 auto; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 10px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); position: relative; }
+  .pulse::after { content:""; position:absolute; inset:0; border-radius:50%; background: var(--ok); animation: ping 2s cubic-bezier(0,0,.2,1) infinite; }
+  @keyframes ping { 0%{ transform:scale(1); opacity:.7 } 75%,100%{ transform:scale(2.6); opacity:0 } }
+  @media (prefers-reduced-motion: reduce) { .pulse::after { animation: none; } }
+
+  h1 { font-size: clamp(26px, 4.4vw, 40px); line-height: 1.08; margin: 0 0 12px; letter-spacing: -.02em; text-wrap: balance; font-weight: 700; }
+  h1 .mono { font-family: var(--mono); font-weight: 600; color: var(--accent); }
+  .lede { color: var(--muted); font-size: clamp(15px, 1.6vw, 17px); max-width: 68ch; margin: 0; }
+
+  .section-label {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted); margin: 44px 0 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after { content:""; flex:1; height:1px; background: var(--border); }
+
+  .flow { display: flex; align-items: stretch; gap: 0; flex-wrap: nowrap; }
+  .node {
+    flex: 1 1 0; min-width: 0;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px 16px 15px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .node::before { content:""; position:absolute; inset:0 0 auto 0; height:3px; background: var(--c, var(--accent)); }
+  .node-head { display:flex; align-items:center; gap:9px; font-weight:700; font-size:15px; margin-bottom:7px; }
+  .node-head .dot { width:10px; height:10px; border-radius:3px; background: var(--c, var(--accent)); flex:none; }
+  .node-id { font-family: var(--mono); font-size: 12.5px; color: var(--text); word-break: break-all; margin-bottom: 6px; }
+  .node-role { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+
+  .arrow {
+    flex: none; align-self: center; width: 46px; text-align: center;
+    color: var(--muted); position: relative; font-family: var(--mono);
+  }
+  .arrow .glyph { font-size: 20px; line-height: 1; color: var(--accent); }
+  .arrow .lbl { display:block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; margin-top: 3px; }
+
+  @media (max-width: 760px) {
+    .flow { flex-direction: column; }
+    .arrow { width: 100%; padding: 6px 0; }
+    .arrow .glyph { display: inline-block; transform: rotate(90deg); }
+  }
+
+  .steps { display: grid; gap: 12px; counter-reset: s; }
+  .step {
+    display: grid; grid-template-columns: 34px 1fr; gap: 14px; align-items: start;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow);
+  }
+  .step .num {
+    counter-increment: s; font-family: var(--mono); font-weight: 700; font-size: 13px;
+    width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .step .num::before { content: counter(s, decimal-leading-zero); }
+  .step h3 { margin: 4px 0 6px; font-size: 14.5px; }
+  .step p { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+  .cmd {
+    font-family: var(--mono); font-size: 12.5px; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 11px; overflow-x: auto; white-space: pre; color: var(--text);
+  }
+  .cmd .flag { color: var(--muted); }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 560px; background: var(--panel); }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--panel-2); }
+  tbody tr:last-child td { border-bottom: none; }
+  td .svc { display:inline-flex; align-items:center; gap:8px; font-weight:600; white-space: nowrap; }
+  td .svc .dot { width:9px; height:9px; border-radius:3px; flex:none; }
+  td.mono, .id { font-family: var(--mono); font-size: 12px; color: var(--text); word-break: break-all; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-family: var(--mono); font-size: 12px; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel); color: var(--text); }
+  .notes { display: grid; gap: 10px; }
+  .note {
+    display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: start;
+    background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--tone, var(--accent));
+    border-radius: 10px; padding: 12px 15px; font-size: 13px;
+  }
+  .note b { color: var(--text); }
+  .note span { color: var(--muted); }
+  .note .tag { font-family: var(--mono); font-size: 10px; letter-spacing:.08em; text-transform:uppercase; color: var(--tone, var(--accent)); padding-top:2px; white-space:nowrap; }
+
+  footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 11.5px; display:flex; flex-wrap:wrap; gap:6px 16px; }
+  </style>
+</head>
+<body>
+  <div class="inner">
+
+    <p class="eyebrow"><span class="pulse"></span> Infrastructure · Live</p>
+    <h1>Architecture — <span class="mono">portfolio.slopeit.com</span></h1>
+    <p class="lede">A static React single-page app, served from Amazon S3 through AWS CloudFront, with Cloudflare handling DNS and edge in front. Deployed manually from the developer machine — a build, an S3 sync, and a cache invalidation.</p>
+
+    <p class="section-label">Request path — how a visitor reaches the site</p>
+    <div class="flow">
+      <div class="node" style="--c: var(--dev)">
+        <div class="node-head"><span class="dot"></span>Visitor</div>
+        <div class="node-id">Browser · HTTPS</div>
+        <div class="node-role">Requests portfolio.slopeit.com</div>
+      </div>
+      <div class="arrow"><span class="glyph">→</span><span class="lbl">DNS+TLS</span></div>
+      <div class="node" style="--c: var(--cf)">
+        <div class="node-head"><span class="dot"></span>Cloudflare</div>
+        <div class="node-id">zone: slopeit.com</div>
+        <div class="node-role">DNS · proxied (orange-cloud) · TLS · edge cache</div>
+      </div>
+      <div class="arrow"><span class="glyph">→</span><span class="lbl">origin</span></div>
+      <div class="node" style="--c: var(--cfront)">
+        <div class="node-head"><span class="dot"></span>CloudFront</div>
+        <div class="node-id">E•••••••••6P</div>
+        <div class="node-role">CDN distribution · d••••••••.cloudfront.net</div>
+      </div>
+      <div class="arrow"><span class="glyph">→</span><span class="lbl">S3 origin</span></div>
+      <div class="node" style="--c: var(--s3)">
+        <div class="node-head"><span class="dot"></span>Amazon S3</div>
+        <div class="node-id">slopeit-•••••••-prod</div>
+        <div class="node-role">Static site origin · us-east-1</div>
+      </div>
+    </div>
+
+    <p class="section-label">Build &amp; deploy — how updates ship</p>
+    <div class="steps">
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Develop &amp; version</h3>
+          <p>Edit the app on the Mac (React 19 + TypeScript). Push source to GitHub for versioning.</p>
+          <div class="cmd">git push origin main   <span class="flag"># → github.com/croguerrero/personalweb</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Build with Vite</h3>
+          <p>Produce the static bundle into <span class="id">dist/</span> (HTML, hashed JS, assets, CV PDF).</p>
+          <div class="cmd">npm run build          <span class="flag"># vite build → dist/</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Sync to S3</h3>
+          <p>Upload the build to the origin bucket. <span class="id">--delete</span> prunes stale files; <span class="id">perfil2.png</span> is preserved.</p>
+          <div class="cmd">aws s3 sync dist/ s3://slopeit-•••••••-prod/ <span class="flag">--delete --exclude "perfil2.png"</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Invalidate the CDN</h3>
+          <p>Purge cached objects so visitors get the new version instead of a stale copy.</p>
+          <div class="cmd">aws cloudfront create-invalidation <span class="flag">--distribution-id E•••••••••6P --paths "/*"</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-label">Components</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Service</th><th>Identifier</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="svc"><span class="dot" style="background:var(--cf)"></span>DNS / Edge</span></td>
+            <td>Cloudflare</td>
+            <td class="mono">slopeit.com · portfolio (proxied)</td>
+            <td>Authoritative DNS, TLS termination, edge caching / WAF in front of AWS.</td>
+          </tr>
+          <tr>
+            <td><span class="svc"><span class="dot" style="background:var(--cfront)"></span>CDN</span></td>
+            <td>AWS CloudFront</td>
+            <td class="mono">E•••••••••6P</td>
+            <td>Global distribution, alias portfolio.slopeit.com, origin = the S3 bucket. Cache invalidated on deploy.</td>
+          </tr>
+          <tr>
+            <td><span class="svc"><span class="dot" style="background:var(--s3)"></span>Origin</span></td>
+            <td>Amazon S3</td>
+            <td class="mono">slopeit-•••••••-prod</td>
+            <td>Stores the built static site (us-east-1, account ••••••••1408).</td>
+          </tr>
+          <tr>
+            <td><span class="svc"><span class="dot" style="background:var(--gh)"></span>Source</span></td>
+            <td>GitHub</td>
+            <td class="mono">croguerrero/personalweb</td>
+            <td>Code repository &amp; version history. Does <b>not</b> serve the live site.</td>
+          </tr>
+          <tr>
+            <td><span class="svc"><span class="dot" style="background:var(--dev)"></span>Build / Deploy</span></td>
+            <td>Local (macOS) + AWS CLI</td>
+            <td class="mono">vite · aws-cli</td>
+            <td>Manual pipeline: build → s3 sync → CloudFront invalidation.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="section-label">Application stack</p>
+    <div class="chips">
+      <span class="chip">React 19</span>
+      <span class="chip">TypeScript</span>
+      <span class="chip">Vite 6</span>
+      <span class="chip">Tailwind CSS</span>
+      <span class="chip">Framer Motion</span>
+      <span class="chip">lucide-react</span>
+      <span class="chip">SPA · base "/"</span>
+    </div>
+
+    <p class="section-label">Notes &amp; caveats</p>
+    <div class="notes">
+      <div class="note" style="--tone: var(--cf)">
+        <span class="tag">Topology</span>
+        <span><b>Two CDNs in series.</b> Responses carry both <span class="id">server: cloudflare</span> and <span class="id">via: CloudFront</span> — Cloudflare proxies in front of CloudFront, which fronts S3.</span>
+      </div>
+      <div class="note" style="--tone: var(--gh)">
+        <span class="tag">Dead path</span>
+        <span><b>The <span class="id">gh-pages</span> GitHub Action is unused.</b> A workflow deploys to a <span class="id">gh-pages</span> branch, but the live site is served from S3 — pushing to git never updates production. Deploys are the manual AWS steps above.</span>
+      </div>
+      <div class="note" style="--tone: var(--accent)">
+        <span class="tag">Perf</span>
+        <span><b>Tailwind loads at runtime via CDN.</b> The browser compiles CSS on each visit, which delays first paint. Moving Tailwind to the Vite build would remove the wait.</span>
+      </div>
+    </div>
+
+    <footer>
+      <span>portfolio.slopeit.com</span>
+      <span>AWS acct ••••••••1408 · us-east-1</span>
+      <span>Cloudflare → CloudFront → S3</span>
+    </footer>
+
+  </div>
+</body>
+</html>
