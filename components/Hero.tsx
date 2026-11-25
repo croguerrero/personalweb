@@ -1,9 +1,13 @@
 import React from 'react';
 import { Terminal } from './Terminal';
-import { motion } from 'framer-motion';
-import { Cloud, Server, ShieldCheck, Activity, Network, FileDown } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Cloud, Server, ShieldCheck, Activity, Network, FileDown, BadgeCheck } from 'lucide-react';
+import { CERTIFICATIONS } from '../constants';
 
 export const Hero: React.FC = () => {
+    const reduce = useReducedMotion();
+    const featuredCert = CERTIFICATIONS[0];
+
     const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
         e.preventDefault();
         const element = document.querySelector(href);
@@ -18,21 +22,24 @@ export const Hero: React.FC = () => {
             {/* Background Abstract Shapes - Cloud Infrastructure Nodes */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
                 <motion.div
-                    animate={{ y: [0, -30, 0], opacity: [0.05, 0.1, 0.05] }}
+                    initial={{ opacity: 0.07 }}
+                    animate={reduce ? undefined : { y: [0, -30, 0], opacity: [0.05, 0.1, 0.05] }}
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                     className="absolute top-[15%] left-[10%] text-devops-accent"
                 >
                     <Cloud size={140} />
                 </motion.div>
                 <motion.div
-                    animate={{ y: [0, 40, 0], opacity: [0.03, 0.08, 0.03] }}
+                    initial={{ opacity: 0.05 }}
+                    animate={reduce ? undefined : { y: [0, 40, 0], opacity: [0.03, 0.08, 0.03] }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                     className="absolute bottom-[20%] right-[10%] text-devops-success"
                 >
                     <Server size={120} />
                 </motion.div>
                 <motion.div
-                    animate={{ scale: [1, 1.1, 1], opacity: [0.03, 0.06, 0.03] }}
+                    initial={{ opacity: 0.04 }}
+                    animate={reduce ? undefined : { scale: [1, 1.1, 1], opacity: [0.03, 0.06, 0.03] }}
                     transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
                     className="absolute top-[40%] right-[30%] text-slate-400"
                 >
@@ -40,7 +47,6 @@ export const Hero: React.FC = () => {
                 </motion.div>
 
                 {/* Connection Lines Grid */}
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5"></div>
                 <svg className="absolute w-full h-full opacity-[0.03]" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <line x1="10" y1="10" x2="90" y2="90" stroke="white" strokeWidth="0.2" />
                     <line x1="90" y1="10" x2="10" y2="90" stroke="white" strokeWidth="0.2" />
@@ -87,6 +93,18 @@ export const Hero: React.FC = () => {
                             <span>AI/LLM Security</span>
                         </div>
 
+                        {featuredCert && (
+                            <a
+                                href={featuredCert.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 mt-5 px-3 py-1.5 rounded-md bg-slate-900/70 border border-sky-500/30 hover:border-sky-400 text-sm text-slate-200 transition-colors"
+                            >
+                                <BadgeCheck size={16} className="text-sky-400" />
+                                <span>{featuredCert.issuer} Certified · {featuredCert.name}</span>
+                            </a>
+                        )}
+
                         <p className="text-slate-400 leading-relaxed max-w-lg mt-6 text-base md:text-lg">
                             Building scalable, secure platforms on <span className="text-slate-200 font-medium">GKE, Istio &amp; Terraform</span>.
                             Now focused on securing <span className="text-slate-200 font-medium">AI agents and LLM pipelines</span> — MCP servers, agentic-AI red-teaming, and private LLM infrastructure.
@@ -104,14 +122,14 @@ export const Hero: React.FC = () => {
                             onClick={(e) => handleNavClick(e, '#experience')}
                             className="px-8 py-3.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded shadow-lg shadow-sky-500/20 transition-all transform hover:-translate-y-0.5 cursor-pointer"
                         >
-                            Deploy Infrastructure
+                            View Experience
                         </a>
                         <a
                             href="#skills"
                             onClick={(e) => handleNavClick(e, '#skills')}
                             className="px-8 py-3.5 border border-slate-700 hover:border-sky-400 text-slate-300 hover:text-sky-400 font-medium rounded transition-all bg-slate-900/50 backdrop-blur-sm cursor-pointer"
                         >
-                            View Logs
+                            Tech Stack
                         </a>
                         <a
                             href="/CV-Christian-Guerrero.pdf"

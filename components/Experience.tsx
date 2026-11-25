@@ -67,7 +67,7 @@ export const Experience: React.FC = () => {
                                         </div>
 
                                         <ul className="space-y-2 mb-4 text-slate-400 list-none text-sm">
-                                            {job.description.slice(0, 4).map((desc, i) => (
+                                            {job.description.map((desc, i) => (
                                                 <li key={i} className="flex gap-2 items-start">
                                                     <span className="mt-1.5 w-1 h-1 bg-slate-600 rounded-full shrink-0 group-hover:bg-sky-500 transition-colors"></span>
                                                     <span className="leading-relaxed">{desc}</span>
@@ -76,7 +76,7 @@ export const Experience: React.FC = () => {
                                         </ul>
 
                                         <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-800/50">
-                                            {job.tech.slice(0, 5).map(t => (
+                                            {job.tech.map(t => (
                                                 <span key={t} className="text-[10px] font-mono font-medium text-sky-300 bg-sky-900/20 px-2 py-1 rounded border border-sky-500/10">
                                                     {t}
                                                 </span>

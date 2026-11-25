@@ -1,20 +1,27 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Terminal as TerminalIcon, Circle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const commands = [
   { cmd: "gcloud config set project portfolio-prod", output: "Updated property [core/project]." },
   { cmd: "terraform init", output: "Initializing provider plugins... Terraform has been successfully initialized!" },
   { cmd: "terraform plan", output: "Plan: 5 to add, 0 to change, 0 to destroy." },
-  { cmd: "terraform apply -auto-approve", output: "aws_s3_bucket.portfolio: Creating... \naws_s3_bucket.portfolio: Creation complete after 3s [id=christian-guerrero-portfolio]" },
+  { cmd: "terraform apply -auto-approve", output: "google_container_cluster.portfolio: Creating... \ngoogle_container_cluster.portfolio: Creation complete after 6m12s [id=projects/portfolio-prod/locations/us-central1/clusters/portfolio-gke]" },
+  { cmd: "gcloud container clusters get-credentials portfolio-gke --region us-central1", output: "Fetching cluster endpoint and auth data.\nkubeconfig entry generated for portfolio-gke." },
   { cmd: "kubectl apply -f k8s/deployment.yaml", output: "deployment.apps/portfolio-app created" },
   { cmd: "kubectl get pods", output: "NAME                             READY   STATUS    RESTARTS   AGE\nportfolio-app-6d4b56c-x82z9      1/1     Running   0          5s" },
 ];
 
 const Typewriter = ({ text, onUpdate }: { text: string; onUpdate: () => void }) => {
   const [displayedText, setDisplayedText] = useState('');
-  
+  const reduce = useReducedMotion();
+
   useEffect(() => {
+    if (reduce) {
+      setDisplayedText(text);
+      onUpdate();
+      return;
+    }
     let index = 0;
     setDisplayedText('');
     
@@ -29,7 +36,7 @@ const Typewriter = ({ text, onUpdate }: { text: string; onUpdate: () => void }) 
     }, 8); // Fast typing speed (8ms per char)
 
     return () => clearInterval(interval);
-  }, [text, onUpdate]);
+  }, [text, onUpdate, reduce]);
 
   return <>{displayedText}</>;
 };

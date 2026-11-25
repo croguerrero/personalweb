@@ -22,13 +22,13 @@ export const Footer: React.FC = () => {
                         >
                             <FileDown size={16} /> CV
                         </a>
-                        <a href="https://www.linkedin.com/in/marcelo-guerrero-760413125" target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800">
+                        <a href="https://www.linkedin.com/in/marcelo-guerrero-760413125" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800">
                             <Linkedin size={20} />
                         </a>
-                        <a href="https://github.com/croguerrero" target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800">
+                        <a href="https://github.com/croguerrero" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800">
                             <Github size={20} />
                         </a>
-                        <a href="mailto:christianmarcelog@gmail.com" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800">
+                        <a href="mailto:christianmarcelog@gmail.com" aria-label="Email" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-sky-400 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800">
                             <Mail size={20} />
                         </a>
                     </div>

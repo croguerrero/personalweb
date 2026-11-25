@@ -19,6 +19,7 @@ export interface Certification {
   issuer: string;
   year: string;
   logo?: string;
+  url?: string;
 }
 
 export interface Project {

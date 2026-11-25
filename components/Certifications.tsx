@@ -1,7 +1,7 @@
 import React from 'react';
 import { CERTIFICATIONS } from '../constants';
 import { motion } from 'framer-motion';
-import { Award, CheckCircle2 } from 'lucide-react';
+import { Award, CheckCircle2, ExternalLink } from 'lucide-react';
 
 export const Certifications: React.FC = () => {
     return (
@@ -11,15 +11,18 @@ export const Certifications: React.FC = () => {
                     <span className="text-yellow-500">./</span> Certifications
                 </h2>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="flex flex-wrap justify-center gap-6">
                     {CERTIFICATIONS.map((cert, idx) => (
-                        <motion.div
+                        <motion.a
                             key={idx}
+                            href={cert.url}
+                            target={cert.url ? '_blank' : undefined}
+                            rel={cert.url ? 'noopener noreferrer' : undefined}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: idx * 0.1 }}
-                            className="bg-slate-800 rounded-lg p-6 border border-slate-700 flex flex-col items-center text-center relative overflow-hidden group"
+                            className="w-full max-w-sm bg-slate-800 rounded-lg p-6 border border-slate-700 flex flex-col items-center text-center relative overflow-hidden group hover:border-slate-500 transition-colors"
                         >
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-green-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
 
@@ -37,7 +40,12 @@ export const Certifications: React.FC = () => {
                                 <CheckCircle2 size={12} />
                                 {cert.year}
                             </span>
-                        </motion.div>
+                            {cert.url && (
+                                <span className="mt-3 inline-flex items-center gap-1 text-xs text-blue-400 group-hover:text-blue-300">
+                                    Verify on Credly <ExternalLink size={12} />
+                                </span>
+                            )}
+                        </motion.a>
                     ))}
                 </div>
 

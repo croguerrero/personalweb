@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const links = [
     { label: 'About', href: '#about' },
-    { label: 'Skills', href: '#skills' },
     { label: 'Experience', href: '#experience' },
+    { label: 'Skills', href: '#skills' },
     { label: 'Certifications', href: '#certifications' },
+    { label: 'Projects', href: '#portfolio' },
     { label: 'Contact', href: '#contact' },
 ];
 
@@ -55,7 +56,12 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Mobile Toggle */}
-        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
+        <button
+            className="md:hidden text-white"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isOpen}
+        >
             {isOpen ? <X /> : <Menu />}
         </button>
       </div>

@@ -35,22 +35,11 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
 
 export const CERTIFICATIONS: Certification[] = [
   {
-    name: "Professional Cloud Security Engineer",
-    issuer: "Google",
-    year: "2024",
-    logo: "/google-cloud-logo.svg"
-  },
-  {
     name: "Professional Cloud DevOps Engineer",
-    issuer: "Google",
-    year: "2023",
-    logo: "/google-cloud-logo.svg"
-  },
-  {
-    name: "Associate Cloud Engineer",
-    issuer: "Google",
-    year: "2022",
-    logo: "/google-cloud-logo.svg"
+    issuer: "Google Cloud",
+    year: "2026",
+    logo: "/google-cloud-logo.svg",
+    url: "https://www.credly.com/badges/da2875e1-3b0b-4cba-ab92-2299544cb0a9"
   },
 ];
 
