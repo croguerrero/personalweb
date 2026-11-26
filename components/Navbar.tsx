@@ -1,95 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { ArrowUpRight, Menu, X } from 'lucide-react';
+import { PROFILE } from '../constants';
 
 const links = [
-    { label: 'About', href: '#about' },
-    { label: 'Experience', href: '#experience' },
-    { label: 'Skills', href: '#skills' },
-    { label: 'Certifications', href: '#certifications' },
-    { label: 'Projects', href: '#portfolio' },
-    { label: 'Contact', href: '#contact' },
+  { label: 'Projects', href: '#portfolio' },
+  { label: 'Experience', href: '#experience' },
+  { label: 'Skills', href: '#skills' },
+  { label: 'Credentials', href: '#certifications' },
 ];
 
-export const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    setIsOpen(false);
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+export function Navbar() {
+  const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-slate-950/90 backdrop-blur-md border-b border-slate-800' : 'bg-transparent'}`}>
-      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-        <a 
-            href="#about" 
-            onClick={(e) => handleNavClick(e, '#about')}
-            className="text-xl font-bold font-mono text-white tracking-tighter"
-        >
-            &lt;CG /&gt;
+    <header
+      className="site-header"
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && open) {
+          setOpen(false);
+          toggleRef.current?.focus();
+        }
+      }}
+    >
+      <div className="shell header-inner">
+        <a className="brand" href="#about" onClick={() => setOpen(false)}>
+          <span className="brand-mark" aria-hidden="true">CG</span>
+          <span>{PROFILE.name}</span>
         </a>
-
-        {/* Desktop */}
-        <div className="hidden md:flex gap-8">
-            {links.map(link => (
-                <a 
-                    key={link.label} 
-                    href={link.href} 
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    className="text-sm font-medium text-slate-300 hover:text-devops-accent transition-colors"
-                >
-                    {link.label}
-                </a>
-            ))}
-        </div>
-
-        {/* Mobile Toggle */}
         <button
-            className="md:hidden text-white"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={isOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={isOpen}
+          className="menu-toggle"
+          type="button"
+          ref={toggleRef}
+          aria-controls="site-navigation"
+          aria-expanded={open}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          onClick={() => setOpen(!open)}
         >
-            {isOpen ? <X /> : <Menu />}
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
+        <nav id="site-navigation" className={open ? 'navigation is-open' : 'navigation'} aria-label="Main navigation">
+          {links.map(({ label, href }) => (
+            <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>
+          ))}
+          <a className="nav-contact" href="#contact" onClick={() => setOpen(false)}>
+            Contact <ArrowUpRight size={15} aria-hidden="true" />
+          </a>
+        </nav>
       </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-            <motion.div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="md:hidden bg-slate-900 border-b border-slate-800 overflow-hidden"
-            >
-                <div className="flex flex-col p-6 gap-4">
-                    {links.map(link => (
-                        <a 
-                            key={link.label} 
-                            href={link.href}
-                            onClick={(e) => handleNavClick(e, link.href)}
-                            className="text-slate-300 hover:text-white"
-                        >
-                            {link.label}
-                        </a>
-                    ))}
-                </div>
-            </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+    </header>
   );
-};
+}

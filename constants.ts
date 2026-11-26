@@ -1,6 +1,38 @@
 import { Job, SkillCategory, Certification, Project, Language } from './types';
 
-export const SUMMARY = "Christian is a Platform & DevSecOps Engineer with 5+ years securing and scaling cloud-native systems on GCP. He owns the DevSecOps toolchain across six business units of a multinational group, embedding SCA, SAST, and Veracode DAST as automated gates in GitLab CI/CD, and designs multi-tenant GKE platforms with Istio service mesh and Terraform-managed infrastructure. His current focus is securing AI agents and LLM pipelines — building Model Context Protocol (MCP) servers, red-teaming agentic AI systems against the OWASP LLM Top 10, and running self-hosted private LLM infrastructure. He brings an SRE mindset, turning recurring failures into permanent, automated fixes.";
+export const PROFILE = {
+  name: "Christian Guerrero",
+  fullName: "Christian Marcelo Guerrero",
+  role: "Platform & DevSecOps Engineer",
+  location: "Ibarra, Ecuador",
+  introduction: "I build and secure cloud platforms on Google Cloud and Kubernetes. My current focus is securing AI agents and LLM pipelines, from scoped MCP tools to private inference.",
+  email: "christianmarcelog@gmail.com",
+  linkedin: "https://www.linkedin.com/in/marcelo-guerrero-760413125",
+  github: "https://github.com/croguerrero",
+};
+
+export const FOCUS_AREAS = [
+  ["Cloud platforms", "Google Cloud · GKE · Istio"],
+  ["Secure delivery", "Terraform · GitLab CI/CD"],
+  ["AI & LLM security", "MCP · Private inference"],
+];
+
+export const TERMINAL_COMMANDS = [
+  { command: "gcloud config set project portfolio-demo", output: "Updated property [core/project]." },
+  { command: "terraform init", output: "Terraform has been successfully initialized." },
+  { command: "terraform plan", output: "Plan: 5 to add, 0 to change, 0 to destroy." },
+  { command: "terraform apply", output: "google_container_cluster.portfolio: Creating...\nApply complete! Resources: 5 added." },
+  { command: "gcloud container clusters get-credentials portfolio-gke --region us-central1", output: "kubeconfig entry generated for portfolio-gke." },
+  { command: "kubectl apply -f k8s/deployment.yaml", output: "deployment.apps/portfolio-app created" },
+  { command: "kubectl get pods", output: "NAME            READY   STATUS\nportfolio-app   1/1     Running" },
+];
+
+export const EDUCATION = {
+  institution: "Universidad Técnica del Norte",
+  specialization: "Specialist in Network and Electronic Engineering",
+  location: "Ibarra, Ecuador",
+  period: "2004–2010",
+};
 
 export const SKILL_CATEGORIES: SkillCategory[] = [
   {

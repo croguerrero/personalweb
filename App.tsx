@@ -1,32 +1,29 @@
-import React from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Skills } from './components/Skills';
 import { Experience } from './components/Experience';
 import { Certifications } from './components/Certifications';
 import { Footer } from './components/Footer';
-import { PipelineProgress } from './components/PipelineProgress';
 import { Portfolio } from './components/Portfolio';
-import { Languages } from './components/Languages';
 import { Contact } from './components/Contact';
+import { PipelineProgress } from './components/PipelineProgress';
+import './styles.css';
 
-const App: React.FC = () => {
+export default function App() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-devops-accent selection:text-slate-900">
+    <div className="portfolio-page">
+      <a className="skip-link" href="#main">Skip to content</a>
       <Navbar />
       <PipelineProgress />
-      <main>
+      <main id="main" tabIndex={-1}>
         <Hero />
+        <Portfolio />
         <Experience />
         <Skills />
         <Certifications />
-        <Portfolio />
-        <Languages />
         <Contact />
       </main>
       <Footer />
     </div>
   );
-};
-
-export default App;
+}

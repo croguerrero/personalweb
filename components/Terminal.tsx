@@ -1,125 +1,88 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Terminal as TerminalIcon, Circle } from 'lucide-react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { RotateCcw, SquareTerminal } from 'lucide-react';
+import { TERMINAL_COMMANDS } from '../constants';
 
-const commands = [
-  { cmd: "gcloud config set project portfolio-prod", output: "Updated property [core/project]." },
-  { cmd: "terraform init", output: "Initializing provider plugins... Terraform has been successfully initialized!" },
-  { cmd: "terraform plan", output: "Plan: 5 to add, 0 to change, 0 to destroy." },
-  { cmd: "terraform apply -auto-approve", output: "google_container_cluster.portfolio: Creating... \ngoogle_container_cluster.portfolio: Creation complete after 6m12s [id=projects/portfolio-prod/locations/us-central1/clusters/portfolio-gke]" },
-  { cmd: "gcloud container clusters get-credentials portfolio-gke --region us-central1", output: "Fetching cluster endpoint and auth data.\nkubeconfig entry generated for portfolio-gke." },
-  { cmd: "kubectl apply -f k8s/deployment.yaml", output: "deployment.apps/portfolio-app created" },
-  { cmd: "kubectl get pods", output: "NAME                             READY   STATUS    RESTARTS   AGE\nportfolio-app-6d4b56c-x82z9      1/1     Running   0          5s" },
-];
+const motionPreference = '(prefers-reduced-motion: reduce)';
+const start = { step: 0, written: 0, run: 0 };
 
-const Typewriter = ({ text, onUpdate }: { text: string; onUpdate: () => void }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  const reduce = useReducedMotion();
+export function Terminal() {
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const outputRef = useRef<HTMLDivElement>(null);
+  const [started, setStarted] = useState(false);
+  const [reduced, setReduced] = useState(() => window.matchMedia(motionPreference).matches);
+  const [{ step, written, run }, setProgress] = useState(start);
+  const done = reduced || step >= TERMINAL_COMMANDS.length;
 
   useEffect(() => {
-    if (reduce) {
-      setDisplayedText(text);
-      onUpdate();
-      return;
+    const media = window.matchMedia(motionPreference);
+    function onChange(event: MediaQueryListEvent) {
+      setReduced(event.matches);
     }
-    let index = 0;
-    setDisplayedText('');
-    
-    const interval = setInterval(() => {
-      if (index < text.length) {
-        setDisplayedText(text.slice(0, index + 1));
-        index++;
-        onUpdate();
-      } else {
-        clearInterval(interval);
-      }
-    }, 8); // Fast typing speed (8ms per char)
-
-    return () => clearInterval(interval);
-  }, [text, onUpdate, reduce]);
-
-  return <>{displayedText}</>;
-};
-
-export const Terminal: React.FC = () => {
-  const [lines, setLines] = useState<{ cmd: string; output: string }[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = useCallback(() => {
-    if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
   }, []);
 
   useEffect(() => {
-    if (currentStep < commands.length) {
-      const timeout = setTimeout(() => {
-        setLines((prev) => [...prev, commands[currentStep]]);
-        setCurrentStep((prev) => prev + 1);
-      }, 1500); // Slightly increased delay to allow typing to finish
-      return () => clearTimeout(timeout);
-    }
-  }, [currentStep]);
+    if (!terminalRef.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setStarted(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.25 });
+    observer.observe(terminalRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [lines, scrollToBottom]);
+    if (!started || done) return;
+    const length = TERMINAL_COMMANDS[step].output.length;
+    const lineDone = written >= length;
+    const delay = lineDone ? 420 : written === 0 ? 410 : 24;
+    const timeout = window.setTimeout(() => {
+      setProgress(lineDone
+        ? { step: step + 1, written: 0, run }
+        : { step, written: Math.min(written + 3, length), run });
+    }, delay);
+    return () => window.clearTimeout(timeout);
+  }, [started, done, step, written, run]);
+
+  useEffect(() => {
+    if (!started || reduced || !outputRef.current) return;
+    outputRef.current.scrollTop = outputRef.current.scrollHeight;
+  }, [started, reduced, step, written, run]);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="w-full max-w-lg mx-auto bg-[#0d1117] rounded-lg overflow-hidden border border-slate-700 shadow-2xl font-mono text-xs sm:text-sm"
-    >
-      <div className="bg-[#161b22] px-4 py-2 flex items-center gap-2 border-b border-slate-700">
-        <div className="flex gap-1.5">
-          <Circle className="w-3 h-3 text-red-500 fill-red-500" />
-          <Circle className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-          <Circle className="w-3 h-3 text-green-500 fill-green-500" />
-        </div>
-        <div className="flex items-center gap-2 ml-4 text-slate-400">
-            <TerminalIcon size={14} />
-            <span>bash — 80x24</span>
-        </div>
+    <div className="deploy-terminal" ref={terminalRef} role="region" aria-label="Simulated terminal deployment">
+      <div className="terminal-bar">
+        <span className="terminal-dots" aria-hidden="true"><i /><i /><i /></span>
+        <span className="terminal-title"><SquareTerminal size={15} aria-hidden="true" /> Deployment demo</span>
+        {!reduced && (
+          <button
+            className="terminal-replay"
+            type="button"
+            aria-label="Replay deployment demo"
+            title="Replay deployment demo"
+            onClick={() => {
+              setStarted(true);
+              setProgress({ ...start, run: run + 1 });
+            }}
+          >
+            <RotateCcw size={16} aria-hidden="true" />
+          </button>
+        )}
       </div>
-      <div 
-        ref={scrollRef}
-        className="p-4 h-80 overflow-y-auto space-y-4 text-slate-300 scroll-smooth"
-      >
-        <div className="text-slate-500">Last login: {new Date().toDateString()} on ttys000</div>
-        {lines.map((line, idx) => (
-          <div key={idx}>
-            <div className="flex gap-2">
-              <span className="text-green-500">➜</span>
-              <span className="text-blue-400">~/infrastructure</span>
-              <span className="text-slate-100">$ {line.cmd}</span>
-            </div>
-            <div className="text-slate-400 whitespace-pre-wrap leading-relaxed mt-1 opacity-80">
-                <Typewriter text={line.output} onUpdate={scrollToBottom} />
-            </div>
+      <div className="terminal-output" ref={outputRef} tabIndex={0} aria-label="Terminal output">
+        {TERMINAL_COMMANDS.slice(0, done ? undefined : step + 1).map(({ command, output }, index) => (
+          <div className="terminal-entry" key={command}>
+            <div className="terminal-command"><span aria-hidden="true">$</span> <code>{command}</code></div>
+            {done || index < step || written >= output.length
+              ? <pre>{output}</pre>
+              : <pre aria-hidden="true">{output.slice(0, written)}<span className="terminal-cursor" /></pre>}
           </div>
         ))}
-        {currentStep < commands.length && (
-            <div className="flex gap-2">
-                 <span className="text-green-500">➜</span>
-                 <span className="text-blue-400">~/infrastructure</span>
-                 <motion.div 
-                    animate={{ opacity: [1, 0] }}
-                    transition={{ repeat: Infinity, duration: 0.8 }}
-                    className="w-2.5 h-5 bg-slate-400 inline-block align-middle"
-                />
-            </div>
-        )}
-        {currentStep >= commands.length && (
-             <div className="flex gap-2">
-                <span className="text-green-500">➜</span>
-                <span className="text-blue-400">~/infrastructure</span>
-                <span className="text-green-400">$ echo "System Ready"</span>
-           </div>
-        )}
+        {done && <p className="terminal-ready" role="status">✓ System ready</p>}
       </div>
-    </motion.div>
+    </div>
   );
-};
+}
