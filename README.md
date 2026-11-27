@@ -26,11 +26,13 @@ El workflow [CI](.github/workflows/ci.yml) corre al abrir o actualizar un pull r
 - **SCA (OSV-Scanner)** revisa las versiones directas y transitivas de `package-lock.json`, incluidas las dependencias de desarrollo, en busca de vulnerabilidades conocidas.
 - **SAST (Semgrep CE)** revisa el código fuente con las reglas de seguridad de `p/default`.
 
-Los análisis marcan su comprobación como fallida si encuentran vulnerabilidades o hallazgos. Los detalles están en los registros de cada job. La publicación a S3 se ejecuta manualmente con el comando de la sección siguiente.
+Los análisis marcan su comprobación como fallida si encuentran vulnerabilidades o hallazgos. Los detalles están en los registros de cada job.
 
 ## Publicación en AWS
 
-Con el código listo en un commit y con credenciales válidas de AWS CLI, ejecuta:
+En un push a `main`, GitHub Actions publica el artefacto `dist/` después de que pasen la compilación, SCA y SAST. El job de despliegue asume por OIDC el rol configurado en el secret `AWS_DEPLOY_ROLE_ARN`. Sube los recursos a S3, publica `index.html` al final y solicita la invalidación de CloudFront.
+
+Para publicar manualmente desde un commit con credenciales válidas de AWS CLI, ejecuta:
 
 ```bash
 npm run deploy
