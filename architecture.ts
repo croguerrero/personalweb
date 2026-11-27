@@ -61,7 +61,7 @@ if (controls && play && sound && status && stages.length === notes.length) {
       else stage.removeAttribute('aria-current');
     });
 
-    status.textContent = `Step ${index + 1} of ${stages.length} · ${stages[index].querySelector('h3')?.textContent}`;
+    status.textContent = `Step ${index + 1} of ${stages.length} · ${stages[index].querySelector('h4')?.textContent}`;
     if (sound.checked) playNote(index);
     timer = window.setTimeout(() => runStage(index + 1), 900);
   };
