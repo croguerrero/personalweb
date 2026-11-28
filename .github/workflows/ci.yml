@@ -62,10 +62,63 @@ jobs:
       - name: Scan source code
         run: semgrep scan --config p/default --metrics off --strict --error .
 
+  changes:
+    name: Detect site changes
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      site: ${{ steps.diff.outputs.site }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Compare with the last deployed commit
+        id: diff
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The last deployed commit is the newest successful run whose publish step
+          # actually ran (a publish skipped by the head-of-main check does not count).
+          base=""
+          for entry in $(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?branch=main&event=push&status=success&per_page=30" \
+              --jq '.workflow_runs[] | "\(.id),\(.head_sha)"'); do
+            run_id="${entry%,*}"
+            publish="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/jobs" \
+              --jq '.jobs[] | select(.name == "Deploy to AWS (OIDC)") | .steps[] | select(.name == "Publish to S3 and invalidate CloudFront") | .conclusion')"
+            if [[ "$publish" == "success" ]]; then
+              base="${entry#*,}"
+              break
+            fi
+          done
+
+          if [[ -z "$base" ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            echo "No previous deployment found; deploying."
+            echo "site=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Files that do not end up in dist/. Anything else counts as a site change.
+          ignored=(':(exclude,glob)**/*.md' ':(exclude).github' ':(exclude).claude'
+            ':(exclude).gitignore' ':(exclude)deploy.sh' ':(exclude)CNAME' ':(exclude)metadata.json')
+          if git diff --quiet "$base" "$GITHUB_SHA" -- . "${ignored[@]}"; then
+            echo "No site changes since the last deployment (${base:0:7}); skipping deployment."
+            echo "site=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Site changes since the last deployment (${base:0:7}):"
+            git diff --name-only "$base" "$GITHUB_SHA" -- . "${ignored[@]}"
+            echo "site=true" >> "$GITHUB_OUTPUT"
+          fi
+
   deploy:
     name: Deploy to AWS (OIDC)
-    needs: [build, sca, sast]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build, sca, sast, changes]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changes.outputs.site == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
@@ -75,29 +128,39 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - name: Check that the commit is still the head of main
+        id: head
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          if [[ "$main_sha" == "$GITHUB_SHA" ]]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping deployment of a commit that is no longer at the head of main."
+            echo "current=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.head.outputs.current == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: portfolio-dist
           path: dist
-      - uses: aws-actions/configure-aws-credentials@45666896f5d8e0f10ae255413f3a4cdd03bdc8f5 # v6.3.1
+      - if: steps.head.outputs.current == 'true'
+        uses: aws-actions/configure-aws-credentials@45666896f5d8e0f10ae255413f3a4cdd03bdc8f5 # v6.3.1
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: us-east-1
           role-duration-seconds: 900
           role-session-name: portfolio-${{ github.run_id }}
+      # The "changes" job looks for this step name to find the last deployed commit.
       - name: Publish to S3 and invalidate CloudFront
+        if: steps.head.outputs.current == 'true'
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
           BUCKET_URI: s3://slopeit-bucket-webpage-prod
           DISTRIBUTION_ID: EDPPV9B86HA6P
         run: |
-          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
-          if [[ "$main_sha" != "$GITHUB_SHA" ]]; then
-            echo "Skipping deployment of a commit that is no longer at the head of main."
-            exit 0
-          fi
-
           test -f dist/index.html
           test -d dist/assets
           aws s3 cp dist/assets/ "$BUCKET_URI/assets/" --recursive \

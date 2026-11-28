@@ -32,6 +32,8 @@ Los análisis marcan su comprobación como fallida si encuentran vulnerabilidade
 
 En un push a `main`, GitHub Actions publica el artefacto `dist/` después de que pasen la compilación, SCA y SAST. El job de despliegue asume por OIDC el rol configurado en el secret `AWS_DEPLOY_ROLE_ARN`. Sube los recursos a S3, publica `index.html` al final y solicita la invalidación de CloudFront.
 
+El despliegue solo ocurre si cambió algún archivo del sitio desde el último commit publicado. El job **Detect site changes** ignora la documentación (`*.md`), `.github/`, `.claude/`, `.gitignore`, `deploy.sh`, `CNAME` y `metadata.json`; si el push solo toca esos archivos, el despliegue se omite.
+
 Para publicar manualmente desde un commit con credenciales válidas de AWS CLI, ejecuta:
 
 ```bash
