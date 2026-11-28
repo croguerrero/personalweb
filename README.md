@@ -18,11 +18,20 @@ npm run preview
 
 La compilación genera `dist/`. Revisa la página principal y `/architecture.html` en la URL local que indica Vite.
 
+## Pruebas de navegador
+
+```bash
+npx playwright install --only-shell chromium
+npm test
+```
+
+`npm test` compila el sitio y ejecuta Playwright sobre la vista previa de producción. Las pruebas cubren navegación, descarga del CV, terminal, arquitectura y uso en móvil. GitHub Actions conserva el resultado y la traza si una prueba falla.
+
 ## Integración continua en GitHub
 
 El workflow [CI](.github/workflows/ci.yml) corre al abrir o actualizar un pull request hacia `main`, al subir commits a `main` y cuando se ejecuta manualmente desde **Actions → CI**.
 
-- **Build and type check** instala las dependencias del lockfile, comprueba TypeScript y compila el sitio.
+- **Build and type check** instala las dependencias del lockfile, comprueba TypeScript, compila el sitio y ejecuta las pruebas de navegador antes de guardar el artefacto de despliegue.
 - **SCA (OSV-Scanner)** revisa las versiones directas y transitivas de `package-lock.json`, incluidas las dependencias de desarrollo, en busca de vulnerabilidades conocidas.
 - **SAST (Semgrep CE)** revisa el código fuente con las reglas de seguridad de `p/default`.
 
@@ -30,9 +39,9 @@ Los análisis marcan su comprobación como fallida si encuentran vulnerabilidade
 
 ## Publicación en AWS
 
-En un push a `main`, GitHub Actions publica el artefacto `dist/` después de que pasen la compilación, SCA y SAST. El job de despliegue asume por OIDC el rol configurado en el secret `AWS_DEPLOY_ROLE_ARN`. Sube los recursos a S3, publica `index.html` al final y solicita la invalidación de CloudFront.
+En un push a `main`, GitHub Actions publica el artefacto `dist/` después de que pasen la compilación, las pruebas de navegador, SCA y SAST. El job de despliegue asume por OIDC el rol configurado en el secret `AWS_DEPLOY_ROLE_ARN`. Sube los recursos a S3, publica `index.html` al final y solicita la invalidación de CloudFront.
 
-El despliegue solo ocurre si cambió algún archivo del sitio desde el último commit publicado. El job **Detect site changes** ignora la documentación (`*.md`), `.github/`, `.claude/`, `.gitignore`, `deploy.sh`, `CNAME` y `metadata.json`; si el push solo toca esos archivos, el despliegue se omite.
+El despliegue solo ocurre si cambió algún archivo del sitio desde el último commit publicado. El job **Detect site changes** ignora la documentación (`*.md`), `.github/`, `.claude/`, `.gitignore`, `deploy.sh`, `CNAME`, `metadata.json`, `tests/` y `playwright.config.ts`; si el push solo toca esos archivos, el despliegue se omite.
 
 Para publicar manualmente desde un commit con credenciales válidas de AWS CLI, ejecuta:
 
